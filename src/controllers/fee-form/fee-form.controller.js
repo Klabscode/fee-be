@@ -117,6 +117,10 @@ exports.getAllForms = async (req, res) => {
 
     };
 
+// allocate.controller.js (or wherever your editAllocateForm endpoint is defined)
+
+// allocateform.controller.js
+
 
     exports.getAllFormsBySection = async (req, res) => {
       try {

@@ -52,7 +52,71 @@ exports.register = async (req, res) => {
           errorRes(res, null, "Error updating allocateform:", ERRORS.UPDATED);
       }
   }
-
+exports.editAllocateForm = async (req, res) => {
+  try {
+    const { feeformId, allocatedTo } = req.query;
+    
+    if (!feeformId || !allocatedTo) {
+      throw new Error('Missing required parameters: feeformId and allocatedTo');
+    }
+    
+    const payload = req.body;
+    console.log('Received payload:', payload);
+    
+    // Update allocateform table
+    await db.allocateform.update(
+      payload,
+      { 
+        where: { 
+          feeformId: feeformId,
+          allocatedTo: allocatedTo 
+        } 
+      }
+    );
+    
+    // If account7 is "Completed", also update the status in the feeform table
+    if (payload.account7 === "Completed") {
+      // Update the feeform table with status "Completed"
+      await db.feeform.update(
+        { 
+          status: "Completed" // Set feeform status to "Completed"
+        },
+        { 
+          where: { 
+            id: feeformId 
+          } 
+        }
+      );
+      
+      console.log(`FeeForm (id: ${feeformId}) status updated to "Completed"`);
+    }
+    
+    // Fetch updated records to return in response
+    const updatedAllocateForm = await db.allocateform.findOne({
+      where: { 
+        feeformId: feeformId,
+        allocatedTo: allocatedTo 
+      }
+    });
+    
+    const updatedFeeForm = await db.feeform.findOne({
+      where: { 
+        id: feeformId 
+      }
+    });
+    
+    successRes(res, {
+      allocateform: updatedAllocateForm,
+      feeform: updatedFeeForm,
+      message: "Successfully updated both records"
+    }, SUCCESS.UPDATED);
+    
+  } catch (error) {
+    console.error('Error updating records:', error);
+    const message = error.message ? error.message : ERRORS.UPDATED;
+    errorRes(res, error, message, file);
+  }
+};
 exports.getAllocatedFormByFeeForm = async (req, res) => {
       try {
         let where = {}
