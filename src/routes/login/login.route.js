@@ -1,5 +1,6 @@
 module.exports = (app) => {
     const value = require("../../controllers/login/login.controller");
+    console.log("Controller functions:", Object.keys(value));
     const { joi, cache } = require("../../helpers/index.helper");
     const {  jwt, ERRORS, SUCCESS, Op } = require("../../helpers/index.helper");
     app.use(function(req, res, next) {
@@ -9,7 +10,17 @@ module.exports = (app) => {
     );
     next();
   });
+  app.get(
+    "/getPendingUsers",
+    [jwt.verifyToken],
+    value.getPendingUsers  // Make sure this function exists in your controller
+)
 
+app.post(
+    "/updateUserStatus",
+    [jwt.verifyToken],
+    value.updateUserStatus  // Make sure this function exists in your controller
+)
   app.post(
     "/register",
     // [jwt.verifyToken],
